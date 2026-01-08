@@ -56,7 +56,11 @@
             "target": "zip",
             "category": "public.app-category.video",
             "identity": null,
-            "icon": "assets/icon.png"
+            "icon": "assets/icon.png",
+            "extendInfo": {
+                "NSCameraUsageDescription": "This app needs access to the camera to record your video overlay.",
+                "NSMicrophoneUsageDescription": "This app needs access to the microphone to record your voice commentary."
+            }
         },
         "linux": {
             "target": "AppImage"
