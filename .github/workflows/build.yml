@@ -3,46 +3,54 @@ name: Build/Release
 on:
   push:
     tags:
-      - 'v*' # Trigger on version tags, e.g. v1.0.0
-  workflow_dispatch: # Allow manual trigger
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
-
+      
       - name: Install Dependencies
-        # Delete package-lock.json to avoid Windows/Mac conflict
-        run: |
-          rm -f package-lock.json
-          npm install
         working-directory: ./ScreenRecorderElectron
+        run: npm install
 
-      - name: Build React App (Vite)
-        run: npm run build
-        working-directory: ./ScreenRecorderElectron
-
-      - name: Build Electron App
-        # Added --verbose for better error logging
-        run: npx electron-builder --publish always -c.mac.identity=null --verbose
+      - name: Build and Release Windows
         working-directory: ./ScreenRecorderElectron
         env:
-          # GitHub creates this token automatically
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Disable code signing verification entirely
+        run: |
+          npm run build
+          npx electron-builder --win --publish always
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Install Dependencies
+        working-directory: ./ScreenRecorderElectron
+        # Force ignore package-lock and install fresh
+        run: |
+          rm -rf node_modules
+          rm -f package-lock.json
+          npm install --no-save
+
+      - name: Build and Release Mac
+        working-directory: ./ScreenRecorderElectron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: |
+          npm run build
+          npx electron-builder --mac dmg --publish always -c.mac.identity=null
