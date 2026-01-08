@@ -48,6 +48,12 @@
                 }
             ]
         },
+        "mac": {
+            "target": "zip",
+            "category": "public.app-category.video",
+            "identity": null,
+            "icon": "assets/icon.png"
+        },
         "linux": {
             "target": "AppImage"
         },
