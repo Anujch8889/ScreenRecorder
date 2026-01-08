@@ -55,7 +55,7 @@
             ],
             "category": "public.app-category.video",
             "identity": null,
-            "icon": "build/icon.png"
+            "icon": "assets/icon.png"
         },
         "linux": {
             "target": "AppImage"
