@@ -49,10 +49,7 @@
             ]
         },
         "mac": {
-            "target": [
-                "dmg",
-                "zip"
-            ],
+            "target": "zip",
             "category": "public.app-category.video",
             "identity": null,
             "icon": "assets/icon.png"

@@ -53,4 +53,4 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: |
           npm run build
-          npx electron-builder --mac dmg --publish always -c.mac.identity=null
+          npx electron-builder --mac --publish always -c.mac.identity=null
