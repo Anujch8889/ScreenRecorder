@@ -44,3 +44,5 @@ jobs:
         env:
           # GitHub creates this token automatically
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Disable code signing verification entirely
+          CSC_IDENTITY_AUTO_DISCOVERY: false
