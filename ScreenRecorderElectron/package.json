@@ -49,9 +49,13 @@
             ]
         },
         "mac": {
-            "target": "dmg",
+            "target": [
+                "dmg",
+                "zip"
+            ],
             "category": "public.app-category.video",
-            "identity": null
+            "identity": null,
+            "icon": "build/icon.png"
         },
         "linux": {
             "target": "AppImage"
