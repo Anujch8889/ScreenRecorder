@@ -190,7 +190,6 @@ function MainApp() {
         }
     };
 
-    const [permissionBlocked, setPermissionBlocked] = useState(false);
 
     const requestPermissions = async () => {
         try {
