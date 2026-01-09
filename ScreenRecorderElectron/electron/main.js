@@ -190,6 +190,10 @@ ipcMain.handle('minimize-window', () => {
     if (mainWindow) mainWindow.minimize();
 });
 
+ipcMain.handle('open-win-settings', () => {
+    require('electron').shell.openExternal('ms-settings:privacy-webcam');
+});
+
 ipcMain.handle('save-video', async (event, buffer, extension = 'webm') => {
     const filters = [{ name: 'Video File', extensions: [extension] }];
     if (extension === 'mp4') filters.push({ name: 'WebM Video', extensions: ['webm'] });

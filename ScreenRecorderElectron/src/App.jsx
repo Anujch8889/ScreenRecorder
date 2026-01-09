@@ -93,6 +93,7 @@ function MainApp() {
     const [screenStream, setScreenStream] = useState(null);
     const [hasPermissions, setHasPermissions] = useState(false);
     const [recordingDuration, setRecordingDuration] = useState(0);
+    const [permissionBlocked, setPermissionBlocked] = useState(false);
 
     // Settings State
     const [showSettings, setShowSettings] = useState(false);
@@ -189,14 +190,24 @@ function MainApp() {
         }
     };
 
+    const [permissionBlocked, setPermissionBlocked] = useState(false);
+
     const requestPermissions = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             stream.getTracks().forEach(t => t.stop());
             setHasPermissions(true);
+            setPermissionBlocked(false);
             getAudioDevices(); // Refresh devices after permission
         } catch (err) {
-            alert("Permissions required!");
+            console.error(err);
+            // Check for System Block (Windows 10/11 Privacy Setting)
+            if (err.name === 'NotAllowedError' || err.message.includes('Permission denied')) {
+                setPermissionBlocked(true);
+                // alert("Access Denied..."); // Removed alert to use UI instead
+            } else {
+                alert("Permission Error: " + err.message);
+            }
         }
     };
 
@@ -360,14 +371,36 @@ function MainApp() {
     if (!hasPermissions) {
         return (
             <div className="permission-screen" style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#1a1a1a', color: 'white'
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#1a1a1a', color: 'white', textAlign: 'center', padding: '20px'
             }}>
                 <h1>👋 Permissions Needed</h1>
+
+                {permissionBlocked ? (
+                    <div style={{ maxWidth: '500px', background: '#331111', padding: '20px', borderRadius: '10px', border: '1px solid red', marginTop: '20px' }}>
+                        <h3 style={{ color: '#ff4444', marginTop: 0 }}>🚫 Access Blocked by Windows</h3>
+                        <p style={{ color: '#ccc', fontSize: '14px' }}>
+                            Your Windows Privacy Settings are blocking the camera.
+                        </p>
+                        <button onClick={() => ipcRenderer.invoke('open-win-settings')} style={{
+                            padding: '10px 20px', fontSize: '16px', background: '#444', border: '1px solid #777', color: 'white', borderRadius: '5px', cursor: 'pointer', marginTop: '10px'
+                        }}>
+                            🔧 Open Windows Camera Settings
+                        </button>
+                        <p style={{ color: '#888', fontSize: '12px', marginTop: '10px' }}>
+                            (Turn ON: "Allow desktop apps to access your camera")
+                        </p>
+                    </div>
+                ) : (
+                    <p style={{ color: '#aaa', maxWidth: '400px', margin: '10px 0' }}>
+                        We need access to your Camera and Microphone to record.
+                    </p>
+                )}
+
                 <button onClick={requestPermissions} style={{
                     padding: '12px 30px', fontSize: '18px', background: 'linear-gradient(45deg, #ff4b1f, #ff9068)',
-                    border: 'none', borderRadius: '25px', color: 'white', marginTop: '20px', cursor: 'pointer'
+                    border: 'none', borderRadius: '25px', color: 'white', marginTop: '30px', cursor: 'pointer', fontWeight: 'bold'
                 }}>
-                    ✅ Allow Access
+                    {permissionBlocked ? "🔄 Retry After Fixing" : "✅ Allow Access"}
                 </button>
             </div>
         )
