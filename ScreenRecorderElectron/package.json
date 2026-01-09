@@ -1,6 +1,6 @@
 {
     "name": "screen-recorder-electron",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "main": "electron/main.js",
     "scripts": {
         "dev": "vite",
@@ -53,7 +53,10 @@
             ]
         },
         "mac": {
-            "target": "zip",
+            "target": [
+                "zip",
+                "dir"
+            ],
             "category": "public.app-category.video",
             "identity": null,
             "icon": "assets/icon.png",

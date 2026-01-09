@@ -54,3 +54,38 @@ jobs:
         run: |
           npm run build
           npx electron-builder --mac --publish always
+
+      - name: Manual Ad-Hoc Sign & Make DMG
+        working-directory: ./ScreenRecorderElectron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 1. Find the .app path (It is usually in release/mac-arm64/Screen Recorder.app)
+          APP_PATH=$(find release -name "*.app" | head -n 1)
+          echo "Found App: $APP_PATH"
+          
+          # 2. Ad-Hoc Sign ( The User's Secret Sauce )
+          codesign --force --deep --sign - "$APP_PATH"
+          echo "Signed Successfully"
+
+          # 3. Remove Quarantine (Though browser might re-add it, we clean it here)
+          xattr -cr "$APP_PATH"
+          echo "Quarantine Removed"
+
+          # 4. Create DMG Manually
+          # Remove spaces for DMG filename to be safe
+          DMG_NAME="ScreenRecorder-AdHoc.dmg"
+          hdiutil create -volname "ScreenRecorder" -srcfolder "$APP_PATH" -ov -format UDZO "$DMG_NAME"
+          echo "DMG Created: $DMG_NAME"
+
+          # 5. Upload to Release (Using gh cli)
+          # We need the tag name. Usually refs/tags/v1.0.x. We extract it or rely on 'v1.0.2'
+          # Better: Upload to 'latest' or specific tag if available
+          # Since we are in a push context, we can just grab the tag from ref or hardcode user's expectation.
+          # Actually, 'electron-builder' just released v1.0.3 (we will bump version). 
+          # We will upload to the tag triggered.
+          
+          # Extract Tag
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "Uploading to tag: $TAG_NAME"
+          gh release upload "$TAG_NAME" "$DMG_NAME" --clobber
